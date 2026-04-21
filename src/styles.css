@@ -145,7 +145,7 @@
 
   /* Brand tokens */
   --navy: oklch(0.22 0.09 265);
-  --navy-light: oklch(0.3 0.08 265);
+  --navy-light: #B8AFD3;
   --red-brand: #E20613;
   --red-brand-foreground: oklch(0.98 0 0);
   --surface: oklch(0.97 0.003 240);
