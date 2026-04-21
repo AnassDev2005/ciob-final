@@ -116,7 +116,7 @@
   --card-foreground: oklch(0.15 0.03 260);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.03 260);
-  --primary: oklch(0.25 0.08 265);
+  --primary: #2C265D;
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.96 0.005 240);
   --secondary-foreground: oklch(0.25 0.08 265);
@@ -128,7 +128,7 @@
   --destructive-foreground: oklch(0.98 0 0);
   --border: oklch(0.92 0.01 250);
   --input: oklch(0.92 0.01 250);
-  --ring: oklch(0.25 0.08 265);
+  --ring: #2C265D;
   --chart-1: oklch(0.65 0.22 41);
   --chart-2: oklch(0.6 0.12 185);
   --chart-3: oklch(0.4 0.07 227);
@@ -146,7 +146,7 @@
   /* Brand tokens */
   --navy: oklch(0.22 0.09 265);
   --navy-light: oklch(0.3 0.08 265);
-  --red-brand: oklch(0.52 0.22 25);
+  --red-brand: #E20613;
   --red-brand-foreground: oklch(0.98 0 0);
   --surface: oklch(0.97 0.003 240);
 }
