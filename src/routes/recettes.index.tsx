@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { ChefHat, Clock, Flame, Sparkles, Users, Utensils, Loader2, ZoomIn, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { PaginationComponent } from "@/components/PaginationComponent";
 
 const recipeSearchSchema = z.object({
   category: z.string().optional(),
@@ -56,6 +57,10 @@ function RecettesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [categories, setCategories] = useState<string[]>(["Tout"]);
   const [loading, setLoading] = useState(true);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   useEffect(() => {
     if (category) {
@@ -90,7 +95,14 @@ function RecettesPage() {
     fetchData();
   }, []);
 
-  const filtered = active === "Tout" ? recipes : recipes.filter((r) => r.category?.name === active);
+  const filtered = useMemo(() => {
+    return active === "Tout" ? recipes : recipes.filter((r) => r.category?.name === active);
+  }, [recipes, active]);
+
+  // Reset pagination when category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [active]);
 
   const featuredRecipe = recipes.length > 0 ? recipes[0] : null;
 
@@ -108,6 +120,12 @@ function RecettesPage() {
     const m = minutes % 60;
     return m > 0 ? `${h}h${m}` : `${h}h`;
   };
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedRecipes = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -172,7 +190,7 @@ function RecettesPage() {
       </section>
 
       {/* Featured recipe */}
-      {featuredRecipe && active === "Tout" && (
+      {featuredRecipe && active === "Tout" && currentPage === 1 && (
         <section className="bg-surface py-16 lg:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
             <div className="grid lg:grid-cols-2 gap-10 items-center bg-card rounded-2xl overflow-hidden border border-border shadow-lg">
@@ -263,88 +281,96 @@ function RecettesPage() {
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((r) => (
-                <article
-                  key={r.id}
-                  className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
-                >
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="relative h-56 overflow-hidden cursor-zoom-in">
-                        {r.image_url ? (
-                          <img
-                            src={r.image_url}
-                            alt={r.title}
-                            loading="lazy"
-                            width={800}
-                            height={800}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-navy/5 flex items-center justify-center">
-                            <ChefHat size={48} className="text-navy opacity-10" />
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedRecipes.map((r) => (
+                  <article
+                    key={r.id}
+                    className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                  >
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="relative h-56 overflow-hidden cursor-zoom-in">
+                          {r.image_url ? (
+                            <img
+                              src={r.image_url}
+                              alt={r.title}
+                              loading="lazy"
+                              width={800}
+                              height={800}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-navy/5 flex items-center justify-center">
+                              <ChefHat size={48} className="text-navy opacity-10" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="bg-white/90 p-2 rounded-full text-navy shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                              <ZoomIn size={20} />
+                            </div>
                           </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="bg-white/90 p-2 rounded-full text-navy shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                            <ZoomIn size={20} />
-                          </div>
+                          <span className="absolute bottom-3 right-3 bg-white/95 text-navy text-[11px] font-semibold uppercase tracking-wider px-2 py-1 rounded">
+                            {r.category?.name || "Tradition"}
+                          </span>
                         </div>
-                        <span className="absolute bottom-3 right-3 bg-white/95 text-navy text-[11px] font-semibold uppercase tracking-wider px-2 py-1 rounded">
-                          {r.category?.name || "Tradition"}
+                      </DialogTrigger>
+                      <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/90 border-none flex items-center justify-center overflow-hidden">
+                        <VisuallyHidden>
+                          <DialogTitle>{r.title}</DialogTitle>
+                        </VisuallyHidden>
+                        <img
+                          src={r.image_url || ""}
+                          alt={r.title}
+                          className="max-w-full max-h-[90vh] object-contain"
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    <div className="p-5">
+                      <h3 className="font-semibold text-foreground text-lg leading-snug">
+                        {r.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                        {r.description}
+                      </p>
+
+                      <div className="mt-4 flex items-center gap-4 text-xs text-foreground/80">
+                        <span className="inline-flex items-center gap-1">
+                          <Clock size={13} className="text-navy" /> {formatTime(r.duration_minutes)}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Users size={13} className="text-navy" /> {r.servings || "—"} pers.
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Flame size={13} className="text-navy" /> {getLevel(r.duration_minutes)}
                         </span>
                       </div>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/90 border-none flex items-center justify-center overflow-hidden">
-                      <VisuallyHidden>
-                        <DialogTitle>{r.title}</DialogTitle>
-                      </VisuallyHidden>
-                      <img
-                        src={r.image_url || ""}
-                        alt={r.title}
-                        className="max-w-full max-h-[90vh] object-contain"
-                      />
-                    </DialogContent>
-                  </Dialog>
 
-                  <div className="p-5">
-                    <h3 className="font-semibold text-foreground text-lg leading-snug">
-                      {r.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                      {r.description}
-                    </p>
-
-                    <div className="mt-4 flex items-center gap-4 text-xs text-foreground/80">
-                      <span className="inline-flex items-center gap-1">
-                        <Clock size={13} className="text-navy" /> {formatTime(r.duration_minutes)}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <Users size={13} className="text-navy" /> {r.servings || "—"} pers.
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <Flame size={13} className="text-navy" /> {getLevel(r.duration_minutes)}
-                      </span>
+                      <div className="mt-4 border-t border-border pt-3 flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground">
+                          <span className="font-semibold text-navy">Outil :</span>{" "}
+                          {r.product_ref || "TITANIC"}
+                        </span>
+                        <Link
+                          to="/recettes/$recipeSlug"
+                          params={{ recipeSlug: r.slug }}
+                          className="text-sm font-semibold text-red-brand hover:underline"
+                        >
+                          Lire →
+                        </Link>
+                      </div>
                     </div>
-
-                    <div className="mt-4 border-t border-border pt-3 flex items-center justify-between">
-                      <span className="text-[11px] text-muted-foreground">
-                        <span className="font-semibold text-navy">Outil :</span>{" "}
-                        {r.product_ref || "TITANIC"}
-                      </span>
-                      <Link
-                        to="/recettes/$recipeSlug"
-                        params={{ recipeSlug: r.slug }}
-                        className="text-sm font-semibold text-red-brand hover:underline"
-                      >
-                        Lire →
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+                  </article>
+                ))}
+              </div>
+              
+              <PaginationComponent 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
           )}
         </div>
       </section>
@@ -357,7 +383,7 @@ function RecettesPage() {
             <div className="relative grid lg:grid-cols-2 gap-8 items-center">
               <div>
                 <span className="inline-flex items-center gap-2 rounded bg-red-brand px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                  <Sparkles size={14} /> Newsletter
+                  <ChefHat size={14} /> Newsletter
                 </span>
                 <h3 className="mt-4 font-heading text-2xl lg:text-3xl text-primary-foreground leading-tight">
                   Recevez nos recettes chaque semaine

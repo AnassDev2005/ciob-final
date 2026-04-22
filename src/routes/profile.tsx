@@ -8,21 +8,21 @@ import {
   User as UserIcon, 
   Camera, 
   Mail, 
-  ArrowLeft, 
-  Save, 
   Shield, 
-  Clock, 
   Calendar,
   Settings,
   LayoutDashboard,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -88,7 +88,7 @@ function ProfilePage() {
 
       if (error) throw error;
       window.dispatchEvent(new Event("profile-updated"));
-      toast.success("Profil mis à jour avec succès");
+      toast.success("Profil mis à jour");
     } catch (error: any) {
       toast.error(error.message || "Erreur lors de la mise à jour");
     } finally {
@@ -101,7 +101,7 @@ function ProfilePage() {
       setUpdating(true);
       const { error } = await supabase.auth.updateUser({ email });
       if (error) throw error;
-      toast.success("E-mail de confirmation envoyé à votre nouvelle adresse.");
+      toast.success("Lien de confirmation envoyé");
     } catch (error: any) {
       toast.error(error.message || "Erreur lors de la mise à jour");
     } finally {
@@ -115,7 +115,7 @@ function ProfilePage() {
       if (!event.target.files || event.target.files.length === 0) return;
 
       const file = event.target.files[0];
-      if (file.size > 4 * 1024 * 1024) throw new Error("Max 4 Mo.");
+      if (file.size > 2 * 1024 * 1024) throw new Error("Image trop lourde (max 2 Mo)");
 
       const fileExt = file.name.split(".").pop();
       const filePath = `${user?.id}/${Math.random()}.${fileExt}`;
@@ -131,7 +131,7 @@ function ProfilePage() {
         await supabase.from("profiles").upsert({ id: user.id, avatar_url: newAvatarUrl });
         window.dispatchEvent(new Event("profile-updated"));
       }
-      toast.success("Avatar mis à jour");
+      toast.success("Photo mise à jour");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -143,8 +143,8 @@ function ProfilePage() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center bg-surface">
-          <Loader2 className="h-10 w-10 animate-spin text-navy" />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
         <Footer />
       </div>
@@ -152,202 +152,175 @@ function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
+    <div className="min-h-screen flex flex-col bg-slate-50/50">
       <Navbar />
       
-      <main className="flex-1 pb-20">
-        {/* Cover Header */}
-        <div className="relative h-48 lg:h-64 bg-navy overflow-hidden">
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#F8FAFC] to-transparent"></div>
-        </div>
-
-        <div className="mx-auto max-w-6xl px-4 -mt-16 relative z-10">
-          <div className="flex flex-col lg:flex-row gap-8">
-            
-            {/* Sidebar / Left Column */}
-            <aside className="w-full lg:w-80 shrink-0 space-y-6">
-              {/* Profile Card */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/60">
-                <div className="flex flex-col items-center text-center">
-                  <div className="relative group mb-4">
-                    <Avatar className="h-32 w-32 ring-4 ring-white shadow-xl">
-                      <AvatarImage src={avatarUrl} />
-                      <AvatarFallback className="bg-slate-100 text-navy text-4xl">
-                        {displayName ? displayName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <label
-                      htmlFor="avatar-upload"
-                      className="absolute bottom-1 right-1 p-2.5 bg-red-brand text-white rounded-full shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-all"
-                    >
-                      {uploading ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
-                      <input type="file" id="avatar-upload" accept="image/*" onChange={uploadAvatar} disabled={uploading} className="hidden" />
-                    </label>
-                  </div>
-                  
-                  <p className="text-[10px] text-slate-400 mb-4 uppercase tracking-widest font-bold">Max 4 Mo</p>
-                  
-                  <h2 className="text-xl font-bold text-navy truncate w-full px-2">
-                    {displayName || "Utilisateur"}
-                  </h2>
-                  <p className="text-sm text-slate-500 truncate w-full px-4 mb-4">
-                    {user?.email}
-                  </p>
-
-                  <div className="flex flex-wrap justify-center gap-2 mb-6">
+      <main className="flex-1 py-10 px-4">
+        <div className="max-w-4xl mx-auto space-y-8">
+          
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b">
+            <div className="flex items-center gap-5">
+              <div className="relative group">
+                <Avatar className="h-24 w-24 border-4 border-white shadow-sm">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback className="bg-slate-100 text-slate-600 text-2xl">
+                    {displayName ? displayName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <label
+                  htmlFor="avatar-upload"
+                  className="absolute -bottom-1 -right-1 p-2 bg-white text-slate-600 rounded-full shadow-md border cursor-pointer hover:bg-slate-50 transition-colors"
+                  title="Changer de photo"
+                >
+                  {uploading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+                  <input type="file" id="avatar-upload" accept="image/*" onChange={uploadAvatar} disabled={uploading} className="hidden" />
+                </label>
+              </div>
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                  {displayName || "Utilisateur"}
+                </h1>
+                <div className="flex flex-wrap gap-2 items-center text-slate-500">
+                  <span className="text-sm">{user?.email}</span>
+                  <span className="h-1 w-1 rounded-full bg-slate-300 hidden md:block" />
+                  <div className="flex gap-2">
                     {isAdmin && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-navy/10 text-navy border border-navy/20">
-                        <Shield size={10} /> Admin
-                      </span>
+                      <Badge variant="secondary" className="bg-navy/5 text-navy border-navy/10 gap-1 px-2 py-0">
+                        <Shield size={10} /> Administrateur
+                      </Badge>
                     )}
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-700 border border-green-100">
-                      Compte Actif
-                    </span>
-                  </div>
-
-                  <Separator className="mb-6 opacity-60" />
-
-                  <div className="w-full space-y-1">
-                    <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-navy hover:bg-slate-50 font-medium" asChild>
-                      <Link to="/profile">
-                        <UserIcon size={18} className="text-slate-400" /> Mon Profil
-                      </Link>
-                    </Button>
-                    {isAdmin && (
-                      <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:text-navy hover:bg-slate-50 font-medium" asChild>
-                        <Link to="/dashboard">
-                          <LayoutDashboard size={18} className="text-slate-400" /> Dashboard
-                        </Link>
-                      </Button>
-                    )}
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start gap-3 text-red-500 hover:text-red-600 hover:bg-red-50 font-medium"
-                      onClick={() => signOut()}
-                    >
-                      <LogOut size={18} className="text-red-400" /> Déconnexion
-                    </Button>
+                    <Badge variant="outline" className="text-emerald-600 border-emerald-100 bg-emerald-50/50 gap-1 px-2 py-0">
+                      Compte actif
+                    </Badge>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Account Stats */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/60 hidden lg:block">
-                <h3 className="text-sm font-bold text-navy uppercase tracking-widest mb-4">Détails Compte</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                      <Calendar size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tight">Membre depuis</p>
-                      <p className="text-sm font-semibold text-navy">
+            <div className="flex gap-3">
+              {isAdmin && (
+                <Button variant="outline" size="sm" className="gap-2" asChild>
+                  <Link to="/dashboard">
+                    <LayoutDashboard size={16} /> Dashboard
+                  </Link>
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-2" onClick={() => signOut()}>
+                <LogOut size={16} /> Déconnexion
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Sidebar info */}
+            <div className="lg:col-span-1 space-y-6">
+              <Card className="border-none shadow-none bg-transparent">
+                <CardHeader className="px-0 pt-0">
+                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-slate-400">À propos</CardTitle>
+                </CardHeader>
+                <CardContent className="px-0 space-y-4">
+                  <div className="flex items-center gap-3 text-slate-600">
+                    <Calendar size={18} className="text-slate-400" />
+                    <div className="text-sm">
+                      <p className="font-medium">Membre depuis</p>
+                      <p className="text-slate-500">
                         {user?.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : "—"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
-                      <Clock size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-500 uppercase font-bold tracking-tight">Dernière connexion</p>
-                      <p className="text-sm font-semibold text-navy">
-                        {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('fr-FR') : "Aujourd'hui"}
-                      </p>
+                  <Separator className="bg-slate-100" />
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-slate-500">Rôles et permissions</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-sm py-1">
+                        <span className="text-slate-600">Accès catalogue</span>
+                        <Badge variant="outline" className="text-[10px] uppercase font-bold text-slate-400 border-slate-200">Public</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-sm py-1">
+                        <span className="text-slate-600">Accès recettes</span>
+                        <Badge variant="outline" className="text-[10px] uppercase font-bold text-slate-400 border-slate-200">Public</Badge>
+                      </div>
+                      {isAdmin && (
+                        <div className="flex items-center justify-between text-sm py-1">
+                          <span className="text-slate-600">Gestion site</span>
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold text-navy border-navy/20">Full Access</Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
-            </aside>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Main Content Column */}
-            <div className="flex-1 space-y-6">
-              {/* Back Button for Mobile */}
-              <div className="lg:hidden flex mb-2">
-                <Button variant="ghost" size="sm" className="gap-2 text-slate-500" onClick={() => window.history.back()}>
-                  <ArrowLeft size={16} /> Retour
-                </Button>
-              </div>
-
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden">
-                <div className="border-b border-slate-100 px-8 py-6">
-                  <h2 className="text-xl font-bold text-navy flex items-center gap-2">
-                    <Settings size={20} className="text-slate-400" /> Paramètres du profil
-                  </h2>
-                  <p className="text-sm text-slate-500">Mettez à jour vos informations publiques</p>
-                </div>
-
-                <div className="p-8 space-y-8">
-                  {/* Public Profile Form */}
-                  <div className="grid gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="displayName" className="text-sm font-bold text-slate-700">Nom d'affichage</Label>
-                      <div className="relative">
-                        <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <Input
-                          id="displayName"
-                          className="pl-10 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl"
-                          value={displayName}
-                          onChange={(e) => setDisplayName(e.target.value)}
-                          placeholder="Comment souhaitez-vous être appelé ?"
-                        />
-                      </div>
+            {/* Main forms */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="shadow-sm border-slate-200">
+                <CardHeader>
+                  <CardTitle className="text-lg">Informations du profil</CardTitle>
+                  <CardDescription>Ces informations seront visibles par les autres membres.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="displayName">Nom d'affichage</Label>
+                    <div className="relative">
+                      <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <Input
+                        id="displayName"
+                        className="pl-10 h-10"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Votre nom ou pseudo"
+                      />
                     </div>
-
-                    <Button
-                      onClick={handleUpdateProfile}
-                      disabled={updating}
-                      className="h-12 bg-navy hover:bg-navy-light text-white rounded-xl shadow-md shadow-navy/10 flex items-center gap-2 px-8 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                      {updating ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                      Enregistrer les modifications
-                    </Button>
                   </div>
+                </CardContent>
+                <CardFooter className="bg-slate-50/50 border-t px-6 py-3 flex justify-end">
+                  <Button onClick={handleUpdateProfile} disabled={updating} size="sm">
+                    {updating && <Loader2 size={14} className="mr-2 animate-spin" />}
+                    Enregistrer les modifications
+                  </Button>
+                </CardFooter>
+              </Card>
 
-                  <Separator className="opacity-60" />
-
-                  {/* Account Settings Form */}
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-base font-bold text-navy">Sécurité et Compte</h3>
-                      <p className="text-xs text-slate-500">Gérez votre adresse e-mail et vos accès</p>
+              <Card className="shadow-sm border-slate-200">
+                <CardHeader>
+                  <CardTitle className="text-lg text-slate-900">Sécurité du compte</CardTitle>
+                  <CardDescription>Gérez vos identifiants de connexion.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Adresse e-mail</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <Input
+                        id="email"
+                        type="email"
+                        className="pl-10 h-10"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-bold text-slate-700">Adresse e-mail</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <Input
-                          id="email"
-                          type="email"
-                          className="pl-10 h-12 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                        />
+                    {email !== user?.email && (
+                      <div className="flex items-start gap-2 p-3 bg-blue-50 text-blue-700 rounded-md text-xs border border-blue-100 mt-2">
+                        <Info size={14} className="mt-0.5 shrink-0" />
+                        <p>Une confirmation sera envoyée à votre nouvelle adresse pour valider le changement.</p>
                       </div>
-                      <div className="p-3 bg-amber-50 rounded-lg border border-amber-100 flex items-start gap-3 mt-2">
-                        <Clock size={16} className="text-amber-600 mt-0.5 shrink-0" />
-                        <p className="text-[11px] text-amber-800 leading-normal">
-                          Note : Le changement d'e-mail nécessite une validation sur votre nouvelle adresse pour être effectif.
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      onClick={handleUpdateEmail}
-                      disabled={updating || email === user?.email}
-                      className="h-12 border-navy/20 text-navy hover:bg-navy/5 rounded-xl flex items-center gap-2 px-8"
-                    >
-                      {updating ? <Loader2 size={18} className="animate-spin" /> : <Mail size={18} />}
-                      Mettre à jour l'e-mail
-                    </Button>
+                    )}
                   </div>
-                </div>
-              </div>
-
+                </CardContent>
+                <CardFooter className="bg-slate-50/50 border-t px-6 py-3 flex justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleUpdateEmail} 
+                    disabled={updating || email === user?.email}
+                    size="sm"
+                  >
+                    {updating && <Loader2 size={14} className="mr-2 animate-spin" />}
+                    Mettre à jour l'e-mail
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
           </div>
         </div>

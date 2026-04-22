@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ArrowLeft,
   Check,
@@ -22,6 +22,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ImageSlider } from "@/components/ImageSlider";
+import { PaginationComponent } from "@/components/PaginationComponent";
 
 export const Route = createFileRoute("/produits/$productId")({
   component: ProductDetailPage,
@@ -58,6 +59,10 @@ function ProductDetailPage() {
   const [relatedRecipes, setRelatedRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Pagination for related products
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   useEffect(() => {
     const fetchProductAndData = async () => {
@@ -79,6 +84,7 @@ function ProductDetailPage() {
       setProduct(productData);
 
       // Parallel fetch for related products and recipes
+      // Note: we fetch more related products now to allow pagination
       const [relatedProdsRes, recipesRes] = await Promise.all([
         productData.category_id 
           ? supabase
@@ -86,7 +92,6 @@ function ProductDetailPage() {
               .select("*, category:categories(name)")
               .eq("category_id", productData.category_id)
               .neq("id", productId)
-              .limit(4)
           : Promise.resolve({ data: [] }),
         supabase
           .from("recipes")
@@ -108,6 +113,12 @@ function ProductDetailPage() {
 
     fetchProductAndData();
   }, [productId]);
+
+  const totalPages = Math.ceil(relatedProducts.length / itemsPerPage);
+  const paginatedRelated = relatedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   if (loading) {
     return (
@@ -329,36 +340,44 @@ function ProductDetailPage() {
           </div>
 
           {relatedProducts.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((p) => (
-                <Link
-                  key={p.id}
-                  to="/produits/$productId"
-                  params={{ productId: p.id }}
-                  className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className="aspect-square bg-surface flex items-center justify-center p-6 overflow-hidden">
-                    {p.image_url ? (
-                      <img
-                        src={p.image_url}
-                        alt={p.name}
-                        className="h-32 w-auto object-contain transition-transform group-hover:scale-110"
-                      />
-                    ) : (
-                      <Package size={48} className="text-muted-foreground opacity-20" />
-                    )}
-                  </div>
-                  <div className="p-4 border-t border-border">
-                    <h3 className="font-semibold text-navy text-sm line-clamp-1 group-hover:text-red-brand transition-colors">
-                      {p.name}
-                    </h3>
-                    <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
-                      Réf: {p.ref}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {paginatedRelated.map((p) => (
+                  <Link
+                    key={p.id}
+                    to="/produits/$productId"
+                    params={{ productId: p.id }}
+                    className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-all"
+                  >
+                    <div className="aspect-square bg-surface flex items-center justify-center p-6 overflow-hidden">
+                      {p.image_url ? (
+                        <img
+                          src={p.image_url}
+                          alt={p.name}
+                          className="h-32 w-auto object-contain transition-transform group-hover:scale-110"
+                        />
+                      ) : (
+                        <Package size={48} className="text-muted-foreground opacity-20" />
+                      )}
+                    </div>
+                    <div className="p-4 border-t border-border">
+                      <h3 className="font-semibold text-navy text-sm line-clamp-1 group-hover:text-red-brand transition-colors">
+                        {p.name}
+                      </h3>
+                      <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
+                        Réf: {p.ref}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              
+              <PaginationComponent 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
           ) : (
             <div className="text-center text-muted-foreground italic">
               Plus de produits arrivent bientôt dans cette section.

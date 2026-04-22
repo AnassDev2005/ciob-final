@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ArrowRight,
   Check,
@@ -15,6 +15,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import heroProduct from "@/assets/hero-product.jpg";
 import { z } from "zod";
+import { PaginationComponent } from "@/components/PaginationComponent";
 
 const productSearchSchema = z.object({
   category: z.string().optional(),
@@ -63,6 +64,10 @@ function ProduitsPage() {
   const [categories, setCategories] = useState<CategoryCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [catalogueUrl, setCatalogueUrl] = useState<string | null>(null);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   useEffect(() => {
     if (category) {
@@ -111,13 +116,26 @@ function ProduitsPage() {
     fetchData();
   }, []);
 
-  const filtered = products
-    .filter((p) => (active === "Tout" ? true : (p.category?.name || "Autre") === active))
-    .filter((p) =>
-      query.trim() === ""
-        ? true
-        : (p.name + (p.description || "") + p.ref).toLowerCase().includes(query.toLowerCase()),
-    );
+  const filtered = useMemo(() => {
+    return products
+      .filter((p) => (active === "Tout" ? true : (p.category?.name || "Autre") === active))
+      .filter((p) =>
+        query.trim() === ""
+          ? true
+          : (p.name + (p.description || "") + p.ref).toLowerCase().includes(query.toLowerCase()),
+      );
+  }, [products, active, query]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [active, query]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedProducts = filtered.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -249,73 +267,81 @@ function ProduitsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((p) => (
-                <article
-                  key={p.id}
-                  className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
-                >
-                  <div className="relative bg-surface p-6 flex items-center justify-center h-60 overflow-hidden">
-                    {p.badge && (
-                      <span
-                        className={`absolute top-4 left-4 bg-navy text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded`}
-                      >
-                        {p.badge}
-                      </span>
-                    )}
-                    {p.image_url ? (
-                      <img
-                        src={p.image_url}
-                        alt={p.name}
-                        loading="lazy"
-                        width={240}
-                        height={240}
-                        className="h-44 w-auto object-contain group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="h-44 w-44 rounded bg-white flex items-center justify-center text-muted-foreground">
-                        <Package size={48} className="opacity-20" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-5">
-                    <p className="text-[11px] uppercase tracking-wider text-red-brand font-semibold">
-                      {p.category?.name || "Autre"}
-                    </p>
-                    <h3 className="mt-1 font-semibold text-foreground text-lg">{p.name}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                      {p.description}
-                    </p>
-
-                    <ul className="mt-4 space-y-1.5 h-20 overflow-hidden">
-                      {(p.features || []).slice(0, 3).map((f) => (
-                        <li key={f} className="flex items-center gap-2 text-xs text-foreground/80">
-                          <Check size={14} className="text-navy shrink-0" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-medium text-navy">Réf: {p.ref}</span>
-                        {p.diametre && (
-                          <span className="text-[10px] text-muted-foreground">{p.diametre}</span>
-                        )}
-                      </div>
-                      <Link
-                        to="/produits/$productId"
-                        params={{ productId: p.id }}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-red-brand hover:gap-2 transition-all"
-                      >
-                        Voir fiche <ArrowRight size={14} />
-                      </Link>
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedProducts.map((p) => (
+                  <article
+                    key={p.id}
+                    className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                  >
+                    <div className="relative bg-surface p-6 flex items-center justify-center h-60 overflow-hidden">
+                      {p.badge && (
+                        <span
+                          className={`absolute top-4 left-4 bg-navy text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded`}
+                        >
+                          {p.badge}
+                        </span>
+                      )}
+                      {p.image_url ? (
+                        <img
+                          src={p.image_url}
+                          alt={p.name}
+                          loading="lazy"
+                          width={240}
+                          height={240}
+                          className="h-44 w-auto object-contain group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="h-44 w-44 rounded bg-white flex items-center justify-center text-muted-foreground">
+                          <Package size={48} className="opacity-20" />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+
+                    <div className="p-5">
+                      <p className="text-[11px] uppercase tracking-wider text-red-brand font-semibold">
+                        {p.category?.name || "Autre"}
+                      </p>
+                      <h3 className="mt-1 font-semibold text-foreground text-lg">{p.name}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                        {p.description}
+                      </p>
+
+                      <ul className="mt-4 space-y-1.5 h-20 overflow-hidden">
+                        {(p.features || []).slice(0, 3).map((f) => (
+                          <li key={f} className="flex items-center gap-2 text-xs text-foreground/80">
+                            <Check size={14} className="text-navy shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-medium text-navy">Réf: {p.ref}</span>
+                          {p.diametre && (
+                            <span className="text-[10px] text-muted-foreground">{p.diametre}</span>
+                          )}
+                        </div>
+                        <Link
+                          to="/produits/$productId"
+                          params={{ productId: p.id }}
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-red-brand hover:gap-2 transition-all"
+                        >
+                          Voir fiche <ArrowRight size={14} />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              
+              <PaginationComponent 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
           )}
         </div>
       </section>

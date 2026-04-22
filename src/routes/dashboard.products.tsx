@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, X, Loader2, Package, Search, Filter } from "lucide-react";
 import { z } from "zod";
 import { ImageUpload } from "@/components/ImageUpload";
 import { MultiImageUpload } from "@/components/MultiImageUpload";
+import { PaginationComponent } from "@/components/PaginationComponent";
 
 export const Route = createFileRoute("/dashboard/products")({
   component: ProductsAdmin,
@@ -62,6 +63,10 @@ function ProductsAdmin() {
   // Filters
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const load = async () => {
     setLoading(true);
@@ -79,13 +84,26 @@ function ProductsAdmin() {
     load();
   }, []);
 
-  const filteredItems = items.filter((item) => {
-    const matchesSearch = 
-      item.name.toLowerCase().includes(search.toLowerCase()) || 
-      item.ref.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || item.category_id === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const matchesSearch = 
+        item.name.toLowerCase().includes(search.toLowerCase()) || 
+        item.ref.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = categoryFilter === "all" || item.category_id === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [items, search, categoryFilter]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, categoryFilter]);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const paginatedItems = filteredItems.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const openNew = () => {
     setEditing(null);
@@ -150,7 +168,7 @@ function ProductsAdmin() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="font-heading text-4xl text-navy">Produits</h1>
@@ -164,7 +182,7 @@ function ProductsAdmin() {
         </button>
       </div>
 
-      <div className="mt-6 flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <input
@@ -192,7 +210,7 @@ function ProductsAdmin() {
         </div>
       </div>
 
-      <div className="mt-6 bg-card border border-border rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
         {loading ? (
           <div className="p-12 flex justify-center">
             <Loader2 className="animate-spin text-navy" />
@@ -203,68 +221,78 @@ function ProductsAdmin() {
             Aucun produit trouvé.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-surface text-left text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Image</th>
-                  <th className="px-4 py-3">Nom</th>
-                  <th className="px-4 py-3">Réf</th>
-                  <th className="px-4 py-3">Taille</th>
-                  <th className="px-4 py-3">Catégorie</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((p) => (
-                  <tr key={p.id} className="border-t border-border">
-                    <td className="px-4 py-3">
-                      {p.image_url ? (
-                        <img
-                          src={p.image_url}
-                          alt={p.name}
-                          className="h-10 w-10 object-contain rounded bg-surface"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-surface flex items-center justify-center text-muted-foreground">
-                          <Package size={16} />
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-foreground">
-                      {p.name}
-                      {p.badge && (
-                        <span className="ml-2 text-[10px] uppercase bg-navy text-white px-1.5 py-0.5 rounded">
-                          {p.badge}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{p.ref}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{p.diametre || "—"}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {categories.find(c => c.id === p.category_id)?.name || "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          onClick={() => openEdit(p)}
-                          className="p-2 hover:bg-surface rounded text-navy"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                        <button
-                          onClick={() => remove(p.id)}
-                          className="p-2 hover:bg-surface rounded text-red-brand"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-surface text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3">Image</th>
+                    <th className="px-4 py-3">Nom</th>
+                    <th className="px-4 py-3">Réf</th>
+                    <th className="px-4 py-3">Taille</th>
+                    <th className="px-4 py-3">Catégorie</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {paginatedItems.map((p) => (
+                    <tr key={p.id} className="border-t border-border">
+                      <td className="px-4 py-3">
+                        {p.image_url ? (
+                          <img
+                            src={p.image_url}
+                            alt={p.name}
+                            className="h-10 w-10 object-contain rounded bg-surface"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded bg-surface flex items-center justify-center text-muted-foreground">
+                            <Package size={16} />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-foreground">
+                        {p.name}
+                        {p.badge && (
+                          <span className="ml-2 text-[10px] uppercase bg-navy text-white px-1.5 py-0.5 rounded">
+                            {p.badge}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{p.ref}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">{p.diametre || "—"}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {categories.find(c => c.id === p.category_id)?.name || "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => openEdit(p)}
+                            className="p-2 hover:bg-surface rounded text-navy"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            onClick={() => remove(p.id)}
+                            className="p-2 hover:bg-surface rounded text-red-brand"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="p-4 border-t border-border bg-surface/30">
+              <PaginationComponent 
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </>
         )}
       </div>
 
