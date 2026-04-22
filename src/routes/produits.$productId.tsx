@@ -184,17 +184,17 @@ function ProductDetailPage() {
               />
               
               <div className="mt-8 grid grid-cols-3 gap-4">
-                {[
-                  { icon: ShieldCheck, label: "Garantie 10 ans", sub: "Haute Durabilité" },
-                  { icon: Star, label: "Qualité Premium", sub: "Aluminium Pur" },
-                  { icon: Truck, label: "Livraison", sub: "Partout au Maroc" },
+                {/* {[
+                  // { icon: ShieldCheck, label: "Garantie 10 ans", sub: "Haute Durabilité" },
+                  // { icon: Star, label: "Qualité Premium", sub: "Aluminium Pur" },
+                  // { icon: Truck, label: "Livraison", sub: "Partout au Maroc" },
                 ].map((item, idx) => (
                   <div key={idx} className="flex flex-col items-center p-4 rounded-2xl border border-border bg-card text-center shadow-sm">
                     <item.icon size={24} className="text-red-brand mb-2" />
                     <span className="text-[10px] uppercase tracking-widest font-black text-navy">{item.label}</span>
                     <span className="text-[9px] text-muted-foreground mt-1 uppercase font-medium">{item.sub}</span>
                   </div>
-                ))}
+                ))} */}
               </div>
             </div>
 
@@ -260,12 +260,12 @@ function ProductDetailPage() {
                     Demander un devis
                   </Link>
                 </Button>
-                <button className="flex items-center gap-4 text-navy font-black text-xs uppercase tracking-widest hover:text-red-brand transition-colors group">
+                {/* <button className="flex items-center gap-4 text-navy font-black text-xs uppercase tracking-widest hover:text-red-brand transition-colors group">
                   <div className="w-14 h-14 rounded-2xl border border-navy/10 flex items-center justify-center group-hover:border-red-brand/20 group-hover:bg-red-brand/5 transition-all">
                     <Download size={24} />
                   </div>
                   Fiche Technique (PDF)
-                </button>
+                </button> */}
               </div>
 
               <div className="mt-12 p-8 rounded-3xl bg-navy text-white relative overflow-hidden group shadow-2xl shadow-navy/20">
