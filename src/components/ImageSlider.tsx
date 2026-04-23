@@ -14,6 +14,8 @@ interface ImageSliderProps {
   alt: string;
   badge?: string | null;
   fallbackIcon?: "product" | "recipe";
+  variant?: "product" | "full";
+  aspectRatio?: "square" | "video" | "portrait" | "wide";
 }
 
 export function ImageSlider({
@@ -21,25 +23,28 @@ export function ImageSlider({
   alt,
   badge,
   fallbackIcon = "product",
+  variant = "product",
+  aspectRatio = "square",
 }: ImageSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
 
   const safeImages = images && images.length > 0 ? images : [];
 
-  const next = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % safeImages.length);
+  const aspectClasses = {
+    square: "aspect-square",
+    video: "aspect-video",
+    portrait: "aspect-[3/4]",
+    wide: "aspect-[16/10]",
   };
 
-  const prev = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length);
-  };
+  const currentAspect = aspectClasses[aspectRatio];
 
   if (safeImages.length === 0) {
     return (
-      <div className="aspect-square rounded-2xl bg-surface border border-border flex items-center justify-center p-8 lg:p-12 overflow-hidden shadow-sm">
+      <div className={`${currentAspect} rounded-2xl flex items-center justify-center overflow-hidden shadow-sm ${
+        variant === "full" ? "bg-navy/5" : "bg-surface border border-border p-8 lg:p-12"
+      }`}>
         {fallbackIcon === "product" ? (
           <Package size={120} className="text-muted-foreground opacity-20" />
         ) : (
@@ -54,21 +59,31 @@ export function ImageSlider({
       <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
         <DialogTrigger asChild>
           <div 
-            className="aspect-square rounded-2xl bg-surface border border-border flex items-center justify-center p-8 lg:p-12 overflow-hidden shadow-sm relative cursor-zoom-in"
+            className={`${currentAspect} rounded-3xl overflow-hidden shadow-2xl relative cursor-zoom-in group/container ${
+              variant === "full" 
+                ? "" 
+                : "bg-surface border border-border p-8 lg:p-12 flex items-center justify-center"
+            }`}
             onClick={() => setIsZoomOpen(true)}
           >
             <img
               src={safeImages[currentIndex]}
               alt={`${alt} - Image ${currentIndex + 1}`}
-              className="max-h-full w-auto object-contain transition-transform duration-700 group-hover:scale-105"
+              className={`transition-transform duration-700 group-hover/container:scale-110 ${
+                variant === "full" 
+                  ? "w-full h-full object-cover" 
+                  : "max-h-full w-auto object-contain"
+              }`}
             />
             
-            <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm text-navy">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/container:opacity-100 transition-opacity" />
+
+            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2.5 rounded-2xl opacity-0 group-hover/container:opacity-100 transition-all transform translate-y-2 group-hover/container:translate-y-0 shadow-lg text-navy">
               <ZoomIn size={20} />
             </div>
 
             {badge && (
-              <Badge className="absolute top-6 left-6 bg-red-brand text-white hover:bg-red-brand px-3 py-1">
+              <Badge className="absolute top-6 left-6 bg-red-brand text-white border-none shadow-lg px-4 py-1.5 text-[10px] font-black uppercase tracking-widest">
                 {badge}
               </Badge>
             )}
@@ -77,20 +92,20 @@ export function ImageSlider({
               <>
                 <button
                   onClick={prev}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-navy p-2 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-navy p-3 rounded-2xl shadow-xl transition-all opacity-0 group-hover/container:opacity-100 transform -translate-x-4 group-hover/container:translate-x-0 z-10"
                   aria-label="Image précédente"
                 >
                   <ChevronLeft size={24} />
                 </button>
                 <button
                   onClick={next}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-navy p-2 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-navy p-3 rounded-2xl shadow-xl transition-all opacity-0 group-hover/container:opacity-100 transform translate-x-4 group-hover/container:translate-x-0 z-10"
                   aria-label="Image suivante"
                 >
                   <ChevronRight size={24} />
                 </button>
                 
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5">
                   {safeImages.map((_, idx) => (
                     <button
                       key={idx}
@@ -98,8 +113,8 @@ export function ImageSlider({
                         e.stopPropagation();
                         setCurrentIndex(idx);
                       }}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        idx === currentIndex ? "bg-red-brand w-4" : "bg-navy/20"
+                      className={`h-1.5 rounded-full transition-all shadow-sm ${
+                        idx === currentIndex ? "bg-red-brand w-8" : "bg-white/60 w-3 hover:bg-white"
                       }`}
                     />
                   ))}

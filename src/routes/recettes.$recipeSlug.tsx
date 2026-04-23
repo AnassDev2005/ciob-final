@@ -182,57 +182,78 @@ function RecipeDetailPage() {
 
       <article>
         {/* Header Section */}
-        <section className="bg-navy py-12 lg:py-20 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-red-brand/10 rounded-full -mr-48 -mt-48 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mb-32 blur-2xl" />
+        <section className="bg-navy py-12 lg:py-24 relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-brand/20 rounded-full -mr-64 -mt-64 blur-[120px] opacity-50" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/10 rounded-full -ml-32 -mb-32 blur-[80px] opacity-30" />
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
           
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
               <div className="order-2 lg:order-1">
-                <Badge className="mb-6 bg-red-brand text-white border-none px-4 py-1 text-[10px] uppercase tracking-widest font-black">
+                <Badge className="mb-6 bg-red-brand text-white border-none px-5 py-1.5 text-[11px] uppercase tracking-[0.2em] font-black shadow-lg shadow-red-brand/20">
                   {recipe.category?.name || "Tradition"}
                 </Badge>
-                <h1 className="text-4xl lg:text-7xl font-heading text-white leading-[0.95] tracking-tight">
+                <h1 className="text-5xl lg:text-8xl font-heading text-white leading-[0.9] tracking-tight">
                   {recipe.title}
                 </h1>
                 
-                <div className="mt-10 flex flex-wrap gap-8 text-white/90">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-sm">
-                      <Clock3 size={20} className="text-red-brand" />
+                <p className="mt-8 text-white/60 text-lg lg:text-xl max-w-xl leading-relaxed font-medium italic">
+                  {recipe.description || "Une expérience culinaire unique, préparée avec passion et savoir-faire."}
+                </p>
+                
+                <div className="mt-12 flex flex-wrap gap-6 lg:gap-10 text-white">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 backdrop-blur-md shadow-inner">
+                      <Clock3 size={24} className="text-red-brand" />
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-50">Préparation</p>
-                      <p className="font-bold text-lg">{formatTime(recipe.duration_minutes)}</p>
+                      <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/40 mb-1">Préparation</p>
+                      <p className="font-bold text-xl">{formatTime(recipe.duration_minutes)}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-sm">
-                      <Users2 size={20} className="text-red-brand" />
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 backdrop-blur-md shadow-inner">
+                      <Users2 size={24} className="text-red-brand" />
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-50">Convives</p>
-                      <p className="font-bold text-lg">{recipe.servings || "—"} personnes</p>
+                      <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/40 mb-1">Convives</p>
+                      <p className="font-bold text-xl">{recipe.servings || "—"} pers.</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-sm">
-                      <Flame size={20} className="text-red-brand" />
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 backdrop-blur-md shadow-inner">
+                      <Flame size={24} className="text-red-brand" />
                     </div>
                     <div>
-                      <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-50">Niveau</p>
-                      <p className="font-bold text-lg">{getLevel(recipe.duration_minutes)}</p>
+                      <p className="text-[10px] uppercase tracking-[0.2em] font-black text-white/40 mb-1">Niveau</p>
+                      <p className="font-bold text-xl">{getLevel(recipe.duration_minutes)}</p>
                     </div>
                   </div>
                 </div>
               </div>
               
               <div className="order-1 lg:order-2">
-                <ImageSlider
-                  images={recipe.images || (recipe.image_url ? [recipe.image_url] : [])}
-                  alt={recipe.title}
-                  fallbackIcon="recipe"
-                />
+                <div className="relative">
+                  {/* Decorative frame for the image */}
+                  <div className="absolute -inset-4 border border-white/10 rounded-[2.5rem] pointer-events-none" />
+                  <div className="absolute -inset-8 border border-white/5 rounded-[3rem] pointer-events-none" />
+                  
+                  <div className="relative z-10 transform lg:rotate-2 hover:rotate-0 transition-transform duration-700">
+                    <ImageSlider
+                      images={recipe.images || (recipe.image_url ? [recipe.image_url] : [])}
+                      alt={recipe.title}
+                      fallbackIcon="recipe"
+                      variant="full"
+                      aspectRatio="wide"
+                    />
+                  </div>
+                  
+                  {/* Floating elements */}
+                  <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-red-brand rounded-3xl flex items-center justify-center shadow-2xl z-20 transform -rotate-12 animate-pulse">
+                    <Star size={40} className="text-white fill-white" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
