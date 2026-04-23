@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState, useMemo } from "react";
 import {
   ArrowRight,
   Check,
@@ -15,9 +15,19 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import heroProduct from "@/assets/hero-product.jpg";
 import { z } from "zod";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const productSearchSchema = z.object({
   category: z.string().optional(),
+  page: z.number().catch(1).optional(),
 });
 
 export const Route = createFileRoute("/produits/")({
@@ -55,8 +65,11 @@ type Product = {
 
 type CategoryCount = { key: string; count: number };
 
+const ITEMS_PER_PAGE = 9;
+
 function ProduitsPage() {
-  const { category } = Route.useSearch();
+  const { category, page = 1 } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const [active, setActive] = useState(category || "Tout");
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
@@ -111,13 +124,34 @@ function ProduitsPage() {
     fetchData();
   }, []);
 
-  const filtered = products
-    .filter((p) => (active === "Tout" ? true : (p.category?.name || "Autre") === active))
-    .filter((p) =>
-      query.trim() === ""
-        ? true
-        : (p.name + (p.description || "") + p.ref).toLowerCase().includes(query.toLowerCase()),
-    );
+  const filtered = useMemo(() => {
+    return products
+      .filter((p) => (active === "Tout" ? true : (p.category?.name || "Autre") === active))
+      .filter((p) =>
+        query.trim() === ""
+          ? true
+          : (p.name + (p.description || "") + p.ref).toLowerCase().includes(query.toLowerCase()),
+      );
+  }, [products, active, query]);
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedProducts = filtered.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
+
+  const handleCategoryChange = (cat: string) => {
+    setActive(cat);
+    navigate({
+      search: (prev) => ({ ...prev, category: cat === "Tout" ? undefined : cat, page: 1 }),
+    });
+  };
+
+  const handlePageChange = (p: number) => {
+    navigate({
+      search: (prev) => ({ ...prev, page: p }),
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -159,7 +193,7 @@ function ProduitsPage() {
               </p>
             </div>
 
-            <div className="lg:col-span-4 grid grid-cols-3 gap-3">
+            {/* <div className="lg:col-span-4 grid grid-cols-3 gap-3">
               {[
                 { v: "+50", l: "Références" },
                 { v: "5", l: "Gammes" },
@@ -175,7 +209,7 @@ function ProduitsPage() {
                   </p>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
@@ -188,7 +222,7 @@ function ProduitsPage() {
             {categories.map((c) => (
               <button
                 key={c.key}
-                onClick={() => setActive(c.key)}
+                onClick={() => handleCategoryChange(c.key)}
                 className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   active === c.key
                     ? "bg-navy text-primary-foreground"
@@ -213,7 +247,10 @@ function ProduitsPage() {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                navigate({ search: (prev) => ({ ...prev, page: 1 }) });
+              }}
               placeholder="Rechercher un produit, une réf..."
               className="w-full rounded-md border border-border bg-card pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
             />
@@ -241,7 +278,7 @@ function ProduitsPage() {
             <div className="flex justify-center py-20">
               <Loader2 className="animate-spin text-navy" size={40} />
             </div>
-          ) : filtered.length === 0 ? (
+          ) : paginatedProducts.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
               <p className="font-heading text-2xl text-navy">Aucun produit trouvé</p>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -249,73 +286,137 @@ function ProduitsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((p) => (
-                <article
-                  key={p.id}
-                  className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
-                >
-                  <div className="relative bg-surface p-6 flex items-center justify-center h-60 overflow-hidden">
-                    {p.badge && (
-                      <span
-                        className={`absolute top-4 left-4 bg-navy text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded`}
-                      >
-                        {p.badge}
-                      </span>
-                    )}
-                    {p.image_url ? (
-                      <img
-                        src={p.image_url}
-                        alt={p.name}
-                        loading="lazy"
-                        width={240}
-                        height={240}
-                        className="h-44 w-auto object-contain group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="h-44 w-44 rounded bg-white flex items-center justify-center text-muted-foreground">
-                        <Package size={48} className="opacity-20" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-5">
-                    <p className="text-[11px] uppercase tracking-wider text-red-brand font-semibold">
-                      {p.category?.name || "Autre"}
-                    </p>
-                    <h3 className="mt-1 font-semibold text-foreground text-lg">{p.name}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                      {p.description}
-                    </p>
-
-                    <ul className="mt-4 space-y-1.5 h-20 overflow-hidden">
-                      {(p.features || []).slice(0, 3).map((f) => (
-                        <li key={f} className="flex items-center gap-2 text-xs text-foreground/80">
-                          <Check size={14} className="text-navy shrink-0" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-medium text-navy">Réf: {p.ref}</span>
-                        {p.diametre && (
-                          <span className="text-[10px] text-muted-foreground">{p.diametre}</span>
-                        )}
-                      </div>
-                      <Link
-                        to="/produits/$productId"
-                        params={{ productId: p.id }}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-red-brand hover:gap-2 transition-all"
-                      >
-                        Voir fiche <ArrowRight size={14} />
-                      </Link>
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedProducts.map((p) => (
+                  <article
+                    key={p.id}
+                    className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                  >
+                    <div className="relative bg-surface p-6 flex items-center justify-center h-60 overflow-hidden">
+                      {p.badge && (
+                        <span
+                          className={`absolute top-4 left-4 bg-navy text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded`}
+                        >
+                          {p.badge}
+                        </span>
+                      )}
+                      {p.image_url ? (
+                        <img
+                          src={p.image_url}
+                          alt={p.name}
+                          loading="lazy"
+                          width={240}
+                          height={240}
+                          className="h-44 w-auto object-contain group-hover:scale-110 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="h-44 w-44 rounded bg-white flex items-center justify-center text-muted-foreground">
+                          <Package size={48} className="opacity-20" />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+
+                    <div className="p-5">
+                      <p className="text-[11px] uppercase tracking-wider text-red-brand font-semibold">
+                        {p.category?.name || "Autre"}
+                      </p>
+                      <h3 className="mt-1 font-semibold text-foreground text-lg">{p.name}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                        {p.description}
+                      </p>
+
+                      <ul className="mt-4 space-y-1.5 h-20 overflow-hidden">
+                        {(p.features || []).slice(0, 3).map((f) => (
+                          <li key={f} className="flex items-center gap-2 text-xs text-foreground/80">
+                            <Check size={14} className="text-navy shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-medium text-navy">Réf: {p.ref}</span>
+                          {p.diametre && (
+                            <span className="text-[10px] text-muted-foreground">{p.diametre}</span>
+                          )}
+                        </div>
+                        <Link
+                          to="/produits/$productId"
+                          params={{ productId: p.id }}
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-red-brand hover:gap-2 transition-all"
+                        >
+                          Voir fiche <ArrowRight size={14} />
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-12">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (page > 1) handlePageChange(page - 1);
+                          }}
+                          className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      
+                      {[...Array(totalPages)].map((_, i) => {
+                        const p = i + 1;
+                        if (
+                          p === 1 ||
+                          p === totalPages ||
+                          (p >= page - 1 && p <= page + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={p}>
+                              <PaginationLink
+                                href="#"
+                                isActive={page === p}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(p);
+                                }}
+                                className="cursor-pointer"
+                              >
+                                {p}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        } else if (p === page - 2 || p === page + 2) {
+                          return (
+                            <PaginationItem key={p}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          );
+                        }
+                        return null;
+                      })}
+
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (page < totalPages) handlePageChange(page + 1);
+                          }}
+                          className={page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

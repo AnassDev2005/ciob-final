@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ChefHat, Clock, Flame, Sparkles, Users, Utensils, Loader2, ZoomIn, X } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState, useMemo } from "react";
+import { ChefHat, Clock, Flame, Sparkles, Users, Utensils, Loader2, ZoomIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -12,9 +12,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const recipeSearchSchema = z.object({
   category: z.string().optional(),
+  page: z.number().catch(1).optional(),
 });
 
 export const Route = createFileRoute("/recettes/")({
@@ -50,8 +60,11 @@ type Recipe = {
   category: { name: string } | null;
 };
 
+const ITEMS_PER_PAGE = 6;
+
 function RecettesPage() {
-  const { category } = Route.useSearch();
+  const { category, page = 1 } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const [active, setActive] = useState(category || "Tout");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [categories, setCategories] = useState<string[]>(["Tout"]);
@@ -90,9 +103,30 @@ function RecettesPage() {
     fetchData();
   }, []);
 
-  const filtered = active === "Tout" ? recipes : recipes.filter((r) => r.category?.name === active);
+  const filtered = useMemo(() => {
+    return active === "Tout" ? recipes : recipes.filter((r) => r.category?.name === active);
+  }, [recipes, active]);
 
   const featuredRecipe = recipes.length > 0 ? recipes[0] : null;
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedRecipes = filtered.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
+
+  const handleCategoryChange = (cat: string) => {
+    setActive(cat);
+    navigate({
+      search: (prev) => ({ ...prev, category: cat === "Tout" ? undefined : cat, page: 1 }),
+    });
+  };
+
+  const handlePageChange = (p: number) => {
+    navigate({
+      search: (prev) => ({ ...prev, page: p }),
+    });
+  };
 
   const getLevel = (duration: number | null) => {
     if (!duration) return "Facile";
@@ -158,7 +192,7 @@ function RecettesPage() {
           {categories.map((c) => (
             <button
               key={c}
-              onClick={() => setActive(c)}
+              onClick={() => handleCategoryChange(c)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 active === c
                   ? "bg-navy text-primary-foreground"
@@ -172,7 +206,7 @@ function RecettesPage() {
       </section>
 
       {/* Featured recipe */}
-      {featuredRecipe && active === "Tout" && (
+      {featuredRecipe && active === "Tout" && page === 1 && (
         <section className="bg-surface py-16 lg:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
             <div className="grid lg:grid-cols-2 gap-10 items-center bg-card rounded-2xl overflow-hidden border border-border shadow-lg">
@@ -255,7 +289,7 @@ function RecettesPage() {
             <div className="flex justify-center py-20">
               <Loader2 className="animate-spin text-navy" size={40} />
             </div>
-          ) : filtered.length === 0 ? (
+          ) : paginatedRecipes.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
               <p className="font-heading text-2xl text-navy">Aucune recette trouvée</p>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -263,94 +297,158 @@ function RecettesPage() {
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((r) => (
-                <article
-                  key={r.id}
-                  className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
-                >
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <div className="relative h-56 overflow-hidden cursor-zoom-in">
-                        {r.image_url ? (
-                          <img
-                            src={r.image_url}
-                            alt={r.title}
-                            loading="lazy"
-                            width={800}
-                            height={800}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-navy/5 flex items-center justify-center">
-                            <ChefHat size={48} className="text-navy opacity-10" />
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedRecipes.map((r) => (
+                  <article
+                    key={r.id}
+                    className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
+                  >
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="relative h-56 overflow-hidden cursor-zoom-in">
+                          {r.image_url ? (
+                            <img
+                              src={r.image_url}
+                              alt={r.title}
+                              loading="lazy"
+                              width={800}
+                              height={800}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-navy/5 flex items-center justify-center">
+                              <ChefHat size={48} className="text-navy opacity-10" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="bg-white/90 p-2 rounded-full text-navy shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                              <ZoomIn size={20} />
+                            </div>
                           </div>
-                        )}
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <div className="bg-white/90 p-2 rounded-full text-navy shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                            <ZoomIn size={20} />
-                          </div>
+                          <span className="absolute bottom-3 right-3 bg-white/95 text-navy text-[11px] font-semibold uppercase tracking-wider px-2 py-1 rounded">
+                            {r.category?.name || "Tradition"}
+                          </span>
                         </div>
-                        <span className="absolute bottom-3 right-3 bg-white/95 text-navy text-[11px] font-semibold uppercase tracking-wider px-2 py-1 rounded">
-                          {r.category?.name || "Tradition"}
+                      </DialogTrigger>
+                      <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/90 border-none flex items-center justify-center overflow-hidden">
+                        <VisuallyHidden>
+                          <DialogTitle>{r.title}</DialogTitle>
+                        </VisuallyHidden>
+                        <img
+                          src={r.image_url || ""}
+                          alt={r.title}
+                          className="max-w-full max-h-[90vh] object-contain"
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    <div className="p-5">
+                      <h3 className="font-semibold text-foreground text-lg leading-snug">
+                        {r.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                        {r.description}
+                      </p>
+
+                      <div className="mt-4 flex items-center gap-4 text-xs text-foreground/80">
+                        <span className="inline-flex items-center gap-1">
+                          <Clock size={13} className="text-navy" /> {formatTime(r.duration_minutes)}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Users size={13} className="text-navy" /> {r.servings || "—"} pers.
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Flame size={13} className="text-navy" /> {getLevel(r.duration_minutes)}
                         </span>
                       </div>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/90 border-none flex items-center justify-center overflow-hidden">
-                      <VisuallyHidden>
-                        <DialogTitle>{r.title}</DialogTitle>
-                      </VisuallyHidden>
-                      <img
-                        src={r.image_url || ""}
-                        alt={r.title}
-                        className="max-w-full max-h-[90vh] object-contain"
-                      />
-                    </DialogContent>
-                  </Dialog>
 
-                  <div className="p-5">
-                    <h3 className="font-semibold text-foreground text-lg leading-snug">
-                      {r.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                      {r.description}
-                    </p>
-
-                    <div className="mt-4 flex items-center gap-4 text-xs text-foreground/80">
-                      <span className="inline-flex items-center gap-1">
-                        <Clock size={13} className="text-navy" /> {formatTime(r.duration_minutes)}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <Users size={13} className="text-navy" /> {r.servings || "—"} pers.
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <Flame size={13} className="text-navy" /> {getLevel(r.duration_minutes)}
-                      </span>
+                      <div className="mt-4 border-t border-border pt-3 flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground">
+                          <span className="font-semibold text-navy">Outil :</span>{" "}
+                          {r.product_ref || "TITANIC"}
+                        </span>
+                        <Link
+                          to="/recettes/$recipeSlug"
+                          params={{ recipeSlug: r.slug }}
+                          className="text-sm font-semibold text-red-brand hover:underline"
+                        >
+                          Lire →
+                        </Link>
+                      </div>
                     </div>
+                  </article>
+                ))}
+              </div>
 
-                    <div className="mt-4 border-t border-border pt-3 flex items-center justify-between">
-                      <span className="text-[11px] text-muted-foreground">
-                        <span className="font-semibold text-navy">Outil :</span>{" "}
-                        {r.product_ref || "TITANIC"}
-                      </span>
-                      <Link
-                        to="/recettes/$recipeSlug"
-                        params={{ recipeSlug: r.slug }}
-                        className="text-sm font-semibold text-red-brand hover:underline"
-                      >
-                        Lire →
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+              {totalPages > 1 && (
+                <div className="mt-12">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (page > 1) handlePageChange(page - 1);
+                          }}
+                          className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      
+                      {[...Array(totalPages)].map((_, i) => {
+                        const p = i + 1;
+                        if (
+                          p === 1 ||
+                          p === totalPages ||
+                          (p >= page - 1 && p <= page + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={p}>
+                              <PaginationLink
+                                href="#"
+                                isActive={page === p}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handlePageChange(p);
+                                }}
+                                className="cursor-pointer"
+                              >
+                                {p}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        } else if (p === page - 2 || p === page + 2) {
+                          return (
+                            <PaginationItem key={p}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          );
+                        }
+                        return null;
+                      })}
+
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (page < totalPages) handlePageChange(page + 1);
+                          }}
+                          className={page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-surface py-16">
+      {/* <section className="bg-surface py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
           <div className="relative overflow-hidden rounded-2xl bg-navy px-8 py-12 lg:p-14">
             <div className="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-red-brand/20 blur-3xl" />
@@ -383,7 +481,7 @@ function RecettesPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <Footer />
     </div>
