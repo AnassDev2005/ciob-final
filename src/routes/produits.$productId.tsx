@@ -172,7 +172,7 @@ function ProductDetailPage() {
                 fallbackIcon="product"
               />
               
-              <div className="mt-8 grid grid-cols-3 gap-4">
+              {/* <div className="mt-8 grid grid-cols-3 gap-4">
                 {[
                   { icon: ShieldCheck, label: "Garantie 10 ans", sub: "Haute Durabilité" },
                   { icon: Star, label: "Qualité Premium", sub: "Aluminium Pur" },
@@ -184,7 +184,7 @@ function ProductDetailPage() {
                     <span className="text-[9px] text-muted-foreground mt-1 uppercase font-medium">{item.sub}</span>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </div>
 
             {/* Product Info */}
