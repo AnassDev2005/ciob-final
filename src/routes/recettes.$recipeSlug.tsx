@@ -18,6 +18,7 @@ import {
   Users2,
   Zap,
   Star,
+  Play,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -43,8 +44,26 @@ type Recipe = {
   product_ref: string | null;
   ingredients: string[] | null;
   steps: string[] | null;
+  youtube_url: string | null;
   category: { name: string } | null;
   product: { id: string; name: string; image_url: string | null; ref: string } | null;
+};
+
+const getYoutubeEmbedUrl = (url: string | null) => {
+  if (!url) return null;
+  let videoId = "";
+  try {
+    if (url.includes("youtube.com/watch?v=")) {
+      videoId = url.split("v=")[1].split("&")[0];
+    } else if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1].split("?")[0];
+    } else if (url.includes("youtube.com/embed/")) {
+      videoId = url.split("embed/")[1].split("?")[0];
+    }
+  } catch (e) {
+    return null;
+  }
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
 };
 
 function RecipeDetailPage() {
@@ -138,6 +157,8 @@ function RecipeDetailPage() {
     return m > 0 ? `${h}h${m}` : `${h}h`;
   };
 
+  const embedUrl = getYoutubeEmbedUrl(recipe.youtube_url);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -216,6 +237,30 @@ function RecipeDetailPage() {
             </div>
           </div>
         </section>
+
+        {/* Video Section */}
+        {embedUrl && (
+          <section className="bg-surface py-12 lg:py-20">
+            <div className="mx-auto max-w-5xl px-4 sm:px-8">
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-heading text-navy flex items-center justify-center gap-3">
+                  <Play size={24} className="text-red-brand fill-red-brand" />
+                  La recette en vidéo
+                </h2>
+                <div className="h-1 w-20 bg-red-brand mx-auto mt-4 rounded-full" />
+              </div>
+              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border-8 border-white bg-navy/5">
+                <iframe
+                  src={embedUrl}
+                  title={`Vidéo de la recette ${recipe.title}`}
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="py-12 lg:py-24 bg-background">
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">

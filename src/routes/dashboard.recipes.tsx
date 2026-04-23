@@ -24,6 +24,7 @@ type Recipe = {
   duration_minutes: number | null;
   servings: number | null;
   product_ref: string | null;
+  youtube_url: string | null;
 };
 
 type Category = { id: string; name: string };
@@ -41,6 +42,7 @@ const schema = z.object({
   image_url: z.string().trim().max(500).optional().or(z.literal("")),
   images: z.array(z.string()).optional().nullable(),
   product_ref: z.string().trim().max(50).optional().nullable(),
+  youtube_url: z.string().trim().max(500).optional().nullable().or(z.literal("")),
 });
 
 const emptyForm = {
@@ -55,6 +57,7 @@ const emptyForm = {
   duration_minutes: "",
   servings: "",
   product_ref: "",
+  youtube_url: "",
 };
 
 function RecipesAdmin() {
@@ -117,6 +120,7 @@ function RecipesAdmin() {
       duration_minutes: r.duration_minutes?.toString() ?? "",
       servings: r.servings?.toString() ?? "",
       product_ref: r.product_ref ?? "",
+      youtube_url: r.youtube_url ?? "",
     });
     setOpen(true);
   };
@@ -148,6 +152,7 @@ function RecipesAdmin() {
       duration_minutes: form.duration_minutes ? Number(form.duration_minutes) : null,
       servings: form.servings ? Number(form.servings) : null,
       product_ref: form.product_ref || null,
+      youtube_url: parsed.data.youtube_url || null,
     };
     const { error } = editing
       ? await supabase.from("recipes").update(payload).eq("id", editing.id)
@@ -360,6 +365,16 @@ function RecipesAdmin() {
                   value={form.servings}
                   onChange={(e) => setForm({ ...form, servings: e.target.value })}
                   className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-sm font-medium">Lien Vidéo YouTube</label>
+                <input
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={form.youtube_url}
+                  onChange={(e) => setForm({ ...form, youtube_url: e.target.value })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
                 />
               </div>
               <div className="sm:col-span-2">
