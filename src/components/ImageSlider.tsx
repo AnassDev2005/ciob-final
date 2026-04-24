@@ -40,6 +40,16 @@ export function ImageSlider({
 
   const currentAspect = aspectClasses[aspectRatio];
 
+  const next = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % safeImages.length);
+  };
+
+  const prev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length);
+  };
+
   if (safeImages.length === 0) {
     return (
       <div className={`${currentAspect} rounded-2xl flex items-center justify-center overflow-hidden shadow-sm ${
