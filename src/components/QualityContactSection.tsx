@@ -2,6 +2,9 @@ import { ShieldCheck, Award, Handshake, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import isoLogo from "@/assets/Logo/cer/Certification_ISO-9001-2015.jpg";
+import marjaneLogo from "@/assets/Logo/cer/Marjane Logo-vector.ma.svg-vector.ma.png";
+import marjaneMarketLogo from "@/assets/Logo/cer/Marjane Market Logo-vector.ma.svg-vector.ma (1).png";
 
 const qualities = [
   {
@@ -59,20 +62,50 @@ export default function QualityContactSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12">
         <div className="grid lg:grid-cols-2 gap-10">
           {/* Quality */}
-          <div className="bg-navy rounded-2xl p-8 lg:p-10 text-primary-foreground">
-            <h2 className="font-heading text-3xl lg:text-4xl">Engagement Qualité & Partenariats</h2>
-            <div className="mt-8 space-y-6">
-              {qualities.map((q) => (
-                <div key={q.title} className="flex gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10">
-                    <q.icon size={20} />
+          <div className="flex flex-col justify-between bg-navy rounded-2xl p-8 lg:p-10 text-primary-foreground">
+            <div>
+              <h2 className="font-heading text-3xl lg:text-4xl">Engagement Qualité & Partenariats</h2>
+              <div className="mt-8 space-y-6">
+                {qualities.map((q) => (
+                  <div key={q.title} className="flex gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                      <q.icon size={20} />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{q.title}</p>
+                      <p className="text-sm text-primary-foreground/70">{q.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold">{q.title}</p>
-                    <p className="text-sm text-primary-foreground/70">{q.desc}</p>
-                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Logos */}
+            <div className="mt-12 pt-8 border-t border-white/5 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/30 mb-8">Accréditations & Distribution</p>
+              <div className="flex flex-wrap items-center justify-center gap-10">
+                <div className="w-32 h-32 flex items-center justify-center">
+                  <img 
+                    src={isoLogo} 
+                    alt="ISO 9001 Certification" 
+                    className="max-w-full max-h-full object-contain opacity-90 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-pointer"
+                  />
                 </div>
-              ))}
+                <div className="w-32 h-32 flex items-center justify-center">
+                  <img 
+                    src={marjaneLogo} 
+                    alt="Marjane Logo" 
+                    className="max-w-full max-h-full object-contain opacity-90 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-pointer"
+                  />
+                </div>
+                <div className="w-32 h-32 flex items-center justify-center">
+                  <img 
+                    src={marjaneMarketLogo} 
+                    alt="Marjane Market Logo" 
+                    className="max-w-full max-h-full object-contain opacity-90 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-pointer"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
