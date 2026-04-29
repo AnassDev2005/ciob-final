@@ -1,41 +1,21 @@
 import { useEffect, useState, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Product data for the slider
-import p1 from "@/assets/products/_MG_7231.jpg";
-import p2 from "@/assets/products/_MG_7301.jpg";
-import p3 from "@/assets/products/_MG_7354.jpg";
-import iconAutocuiseur from "@/assets/products/1.png";
-import iconPoele from "@/assets/products/2.png";
-import iconMarmite from "@/assets/products/3.png";
-
-const HERO_PRODUCTS = [
-  {
-    image: p1,
-    icon: iconAutocuiseur,
-    title: "Faitout Alu Anses Bak",
-    desc: "A classic aluminum cooking pot equipped with heat-resistant Bakelite handles",
-  },
-  {
-    image: p2,
-    icon: iconPoele,
-    title: "Bouilloire Alu",
-    desc: "A traditional aluminum stovetop kettle featuring a decorative embossed \"grid\" pattern on the lower half.",
-  },
-  {
-    image: p3,
-    icon: iconMarmite,
-    title: "Friteuse Conic Alu",
-    desc: "A specialized deep-frying pan with a conical shape. It comes with a removable wire mesh strainer",
-  },
-];
+type Slide = {
+  image: string;
+  icon: string | null;
+  title: string;
+  desc: string;
+};
 
 export default function HeroSection() {
   const [catalogueUrl, setCatalogueUrl] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
     Autoplay({ delay: 5000, stopOnInteraction: false }),
@@ -54,19 +34,44 @@ export default function HeroSection() {
   }, [emblaApi, onSelect]);
 
   useEffect(() => {
-    async function fetchCatalogue() {
-      const { data } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "catalogue_url")
-        .single();
-      
-      if (data) {
-        setCatalogueUrl(data.value);
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [settingsRes, heroRes] = await Promise.all([
+          supabase.from("site_settings").select("value").eq("key", "catalogue_url").single(),
+          supabase.from("hero_slides").select("*").order("order_index", { ascending: true })
+        ]);
+        
+        if (settingsRes.data) {
+          setCatalogueUrl(settingsRes.data.value);
+        }
+
+        if (heroRes.data && heroRes.data.length > 0) {
+          setSlides(heroRes.data.map(h => ({
+            image: h.image_url,
+            icon: h.icon_url,
+            title: h.title,
+            desc: h.description || "",
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching hero data:", error);
+      } finally {
+        setLoading(false);
       }
     }
-    fetchCatalogue();
+    fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[400px] lg:h-[700px] flex items-center justify-center bg-background">
+        <Loader2 className="animate-spin text-navy" size={40} />
+      </div>
+    );
+  }
+
+  if (slides.length === 0) return null;
 
   return (
     <section className="relative bg-background overflow-hidden">
@@ -106,7 +111,7 @@ export default function HeroSection() {
             {/* Main Carousel */}
             <div className="overflow-hidden rounded-3xl shadow-2xl border border-border bg-surface" ref={emblaRef}>
               <div className="flex">
-                {HERO_PRODUCTS.map((product, idx) => (
+                {slides.map((product, idx) => (
                   <div key={idx} className="flex-[0_0_100%] min-w-0 relative h-[400px] lg:h-[550px]">
                     <img
                       src={product.image}
@@ -123,20 +128,22 @@ export default function HeroSection() {
             <div className="absolute -bottom-6 -left-6 right-6 lg:right-auto lg:w-80 animate-in fade-in zoom-in duration-500 delay-700">
               <div className="bg-card rounded-2xl p-5 shadow-xl border border-border flex items-center gap-5 backdrop-blur-sm bg-card/95">
                 <div className="relative h-16 w-16 shrink-0 bg-surface rounded-xl p-2 flex items-center justify-center border border-border shadow-inner">
-                  {HERO_PRODUCTS.map((product, idx) => (
-                    <img
-                      key={idx}
-                      src={product.icon}
-                      alt=""
-                      className={`absolute inset-2 w-12 h-12 object-contain transition-all duration-500 ${
-                        selectedIndex === idx ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-12"
-                      }`}
-                    />
+                  {slides.map((product, idx) => (
+                    product.icon ? (
+                      <img
+                        key={idx}
+                        src={product.icon}
+                        alt=""
+                        className={`absolute inset-2 w-12 h-12 object-contain transition-all duration-500 ${
+                          selectedIndex === idx ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-12"
+                        }`}
+                      />
+                    ) : null
                   ))}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="h-14 flex flex-col justify-center overflow-hidden">
-                    {HERO_PRODUCTS.map((product, idx) => (
+                    {slides.map((product, idx) => (
                       <div
                         key={idx}
                         className={`transition-all duration-500 transform ${
@@ -158,7 +165,7 @@ export default function HeroSection() {
 
             {/* Navigation Dots */}
             <div className="absolute top-6 right-6 flex gap-2">
-              {HERO_PRODUCTS.map((_, idx) => (
+              {slides.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => emblaApi?.scrollTo(idx)}

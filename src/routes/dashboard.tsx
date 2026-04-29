@@ -34,6 +34,7 @@ const navItems: ReadonlyArray<{
   exact?: boolean;
 }> = [
   { to: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
+  { to: "/dashboard/hero", label: "Hero", icon: ExternalLink },
   { to: "/dashboard/products", label: "Produits", icon: Package },
   { to: "/dashboard/recipes", label: "Recettes", icon: ChefHat },
   { to: "/dashboard/categories", label: "Catégories", icon: Tags },

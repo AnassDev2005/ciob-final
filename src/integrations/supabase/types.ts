@@ -74,6 +74,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      hero_slides: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          image_url: string;
+          icon_url: string | null;
+          order_index: number | null;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          image_url: string;
+          icon_url?: string | null;
+          order_index?: number | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          image_url?: string;
+          icon_url?: string | null;
+          order_index?: number | null;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       products: {
         Row: {
           badge: string | null;

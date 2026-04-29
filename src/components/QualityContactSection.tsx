@@ -1,10 +1,13 @@
 import { ShieldCheck, Award, Handshake, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 import isoLogo from "@/assets/Logo/cer/Certification_ISO-9001-2015.jpg";
 import marjaneLogo from "@/assets/Logo/cer/Marjane Logo-vector.ma.svg-vector.ma.png";
 import marjaneMarketLogo from "@/assets/Logo/cer/Marjane Market Logo-vector.ma.svg-vector.ma (1).png";
+import atacadaoLogo from "@/assets/Logo/cer/atacadao.png";
 
 const qualities = [
   {
@@ -24,12 +27,24 @@ const qualities = [
   },
 ];
 
+const CERTIFICATES = [
+  { src: isoLogo, alt: "ISO 9001 Certification" },
+  { src: marjaneLogo, alt: "Marjane Logo" },
+  { src: marjaneMarketLogo, alt: "Marjane Market Logo" },
+  { src: atacadaoLogo, alt: "Atacadao Logo" },
+  // Repeat to ensure smooth looping if needed, but Embla loop handles it
+];
+
 export default function QualityContactSection() {
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const [emblaRef] = useEmblaCarousel({ loop: true, align: "center", dragFree: true }, [
+    Autoplay({ delay: 2000, stopOnInteraction: false, playOnInit: true }),
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,30 +95,35 @@ export default function QualityContactSection() {
               </div>
             </div>
 
-            {/* Logos */}
+            {/* Logos Ticker */}
             <div className="mt-12 pt-8 border-t border-white/5 text-center">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/30 mb-8">Accréditations & Distribution</p>
-              <div className="flex flex-wrap items-center justify-center gap-10">
-                <div className="w-32 h-32 flex items-center justify-center">
-                  <img 
-                    src={isoLogo} 
-                    alt="ISO 9001 Certification" 
-                    className="max-w-full max-h-full object-contain opacity-90 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-pointer"
-                  />
-                </div>
-                <div className="w-32 h-32 flex items-center justify-center">
-                  <img 
-                    src={marjaneLogo} 
-                    alt="Marjane Logo" 
-                    className="max-w-full max-h-full object-contain opacity-90 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-pointer"
-                  />
-                </div>
-                <div className="w-32 h-32 flex items-center justify-center">
-                  <img 
-                    src={marjaneMarketLogo} 
-                    alt="Marjane Market Logo" 
-                    className="max-w-full max-h-full object-contain opacity-90 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300 cursor-pointer"
-                  />
+              
+              <div className="overflow-hidden" ref={emblaRef}>
+                <div className="flex items-center">
+                  {CERTIFICATES.map((cert, idx) => (
+                    <div key={idx} className="flex-[0_0_50%] sm:flex-[0_0_33.33%] min-w-0 px-4">
+                      <div className="h-24 flex items-center justify-center bg-white/5 rounded-xl p-4">
+                        <img 
+                          src={cert.src} 
+                          alt={cert.alt} 
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  {/* Duplicate for smoother loop on small sets if needed, but Embla is fine */}
+                  {CERTIFICATES.map((cert, idx) => (
+                    <div key={`dup-${idx}`} className="flex-[0_0_50%] sm:flex-[0_0_33.33%] min-w-0 px-4">
+                      <div className="h-24 flex items-center justify-center bg-white/5 rounded-xl p-4">
+                        <img 
+                          src={cert.src} 
+                          alt={cert.alt} 
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

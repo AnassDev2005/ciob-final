@@ -26,6 +26,7 @@ import { Route as DashboardUsersRouteImport } from './routes/dashboard.users'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardRecipesRouteImport } from './routes/dashboard.recipes'
 import { Route as DashboardProductsRouteImport } from './routes/dashboard.products'
+import { Route as DashboardHeroRouteImport } from './routes/dashboard.hero'
 import { Route as DashboardContactsRouteImport } from './routes/dashboard.contacts'
 import { Route as DashboardCategoriesRouteImport } from './routes/dashboard.categories'
 
@@ -114,6 +115,11 @@ const DashboardProductsRoute = DashboardProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardHeroRoute = DashboardHeroRouteImport.update({
+  id: '/hero',
+  path: '/hero',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardContactsRoute = DashboardContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/recettes': typeof RecettesRouteWithChildren
   '/dashboard/categories': typeof DashboardCategoriesRoute
   '/dashboard/contacts': typeof DashboardContactsRoute
+  '/dashboard/hero': typeof DashboardHeroRoute
   '/dashboard/products': typeof DashboardProductsRoute
   '/dashboard/recipes': typeof DashboardRecipesRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/dashboard/categories': typeof DashboardCategoriesRoute
   '/dashboard/contacts': typeof DashboardContactsRoute
+  '/dashboard/hero': typeof DashboardHeroRoute
   '/dashboard/products': typeof DashboardProductsRoute
   '/dashboard/recipes': typeof DashboardRecipesRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/recettes': typeof RecettesRouteWithChildren
   '/dashboard/categories': typeof DashboardCategoriesRoute
   '/dashboard/contacts': typeof DashboardContactsRoute
+  '/dashboard/hero': typeof DashboardHeroRoute
   '/dashboard/products': typeof DashboardProductsRoute
   '/dashboard/recipes': typeof DashboardRecipesRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/recettes'
     | '/dashboard/categories'
     | '/dashboard/contacts'
+    | '/dashboard/hero'
     | '/dashboard/products'
     | '/dashboard/recipes'
     | '/dashboard/settings'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/dashboard/categories'
     | '/dashboard/contacts'
+    | '/dashboard/hero'
     | '/dashboard/products'
     | '/dashboard/recipes'
     | '/dashboard/settings'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/recettes'
     | '/dashboard/categories'
     | '/dashboard/contacts'
+    | '/dashboard/hero'
     | '/dashboard/products'
     | '/dashboard/recipes'
     | '/dashboard/settings'
@@ -381,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProductsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/hero': {
+      id: '/dashboard/hero'
+      path: '/hero'
+      fullPath: '/dashboard/hero'
+      preLoaderRoute: typeof DashboardHeroRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/contacts': {
       id: '/dashboard/contacts'
       path: '/contacts'
@@ -401,6 +420,7 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteChildren {
   DashboardCategoriesRoute: typeof DashboardCategoriesRoute
   DashboardContactsRoute: typeof DashboardContactsRoute
+  DashboardHeroRoute: typeof DashboardHeroRoute
   DashboardProductsRoute: typeof DashboardProductsRoute
   DashboardRecipesRoute: typeof DashboardRecipesRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
@@ -411,6 +431,7 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCategoriesRoute: DashboardCategoriesRoute,
   DashboardContactsRoute: DashboardContactsRoute,
+  DashboardHeroRoute: DashboardHeroRoute,
   DashboardProductsRoute: DashboardProductsRoute,
   DashboardRecipesRoute: DashboardRecipesRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
