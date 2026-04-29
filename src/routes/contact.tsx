@@ -49,7 +49,7 @@ const contactItems = [
   {
     icon: Phone,
     title: "Téléphone",
-    lines: ["+212 535 729 168", "Lun-Ven : 8h-17h"],
+    lines: ["+212 661 411 025", "Lun-Ven : 8h-17h"],
   },
   {
     icon: Mail,

@@ -47,7 +47,7 @@ export default function Footer() {
                 <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover:text-navy transition-colors">YouTube</span>
               </a>
               <a 
-                href="https://wa.me/212535729168" 
+                href="https://wa.me/212661654148" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="group flex flex-col items-center gap-2"
@@ -69,7 +69,7 @@ export default function Footer() {
               <img src={ciobLogo} alt="Ciob" className="h-6 w-auto" />
               <p className="mt-3 text-sm text-primary-foreground/60 leading-relaxed">
                 L'excellence de la cuisson industrielle au service du Maroc. Côté Maroc, fabrique des
-                ustensiles de cuisine haut de gamme depuis 1991.
+                ustensiles de cuisine haut de gamme depuis 1996.
               </p>
             </div>
 
@@ -134,7 +134,7 @@ export default function Footer() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone size={16} className="shrink-0" />
-                  +212 535 729 168
+                  +212 661 411 025
                 </li>
               </ul>
             </div>

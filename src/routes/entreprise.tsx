@@ -26,25 +26,21 @@ export const Route = createFileRoute("/entreprise")({
 
 const timeline = [
   {
-    year: "1991",
+    year: "1996",
     title: "Fondation",
     desc: "Création de TITANIC à Casablanca avec une vision : démocratiser la cuisson de qualité au Maroc.",
   },
   {
     year: "2002",
     title: "Expansion industrielle",
-    desc: "Ouverture d'une nouvelle unité de production de 5000m² équipée des dernières technologies.",
+    desc: "Ouverture d'une nouvelle unité de production de 3000m² équipée des dernières technologies.",
   },
   {
-    year: "2010",
+    year: "2009",
     title: "Certification ISO 9001",
     desc: "Reconnaissance internationale de notre système de management de la qualité.",
   },
-  {
-    year: "2018",
-    title: "Innovation Granite",
-    desc: "Lancement de notre gamme antiadhésive sans PFOA, fierté de la R&D marocaine.",
-  },
+
   {
     year: "2024",
     title: "Leader régional",
@@ -61,7 +57,7 @@ const values = [
 
 const stats = [
   { v: "30+", l: "Années d'expertise" },
-  { v: "5000m²", l: "Site de production" },
+  { v: "11600m²", l: "Site de production" },
   { v: "150+", l: "Collaborateurs" },
   { v: "12", l: "Pays distribués" },
 ];
@@ -94,7 +90,7 @@ function EntreprisePage() {
 
           <div className="mt-6 max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded bg-red-brand px-3 py-1 text-xs font-semibold uppercase tracking-wider">
-              <Sparkles size={14} /> Depuis 1991
+              <Sparkles size={14} /> Depuis 1996
             </span>
             <h1 className="font-heading mt-4 text-4xl sm:text-5xl lg:text-6xl leading-[0.95]">
               Notre <span className="text-red-brand">savoir-faire</span>,<br />

@@ -74,14 +74,13 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-block rounded bg-red-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-red-brand mb-4 animate-in fade-in slide-in-from-left duration-700">
-              Industrie Marocaine Premium
+              Ciob
             </span>
             <h1 className="font-heading text-4xl sm:text-5xl lg:text-7xl leading-[0.95] text-navy animate-in fade-in slide-in-from-left duration-700 delay-150">
-              Articles ménagers fabriqués au Maroc
+              fabrication des articles de menage en aluminium , inox et aluminium antiadhesif depuis 1996
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-left duration-700 delay-300">
-              L'excellence de la cuisson industrielle et domestique depuis plus de 30 ans. Maîtrise
-              parfaite de l'aluminium, de l'inox et des revêtements antiadhésifs.
+              Présente sur le marché depuis 1996, la Société CIOB installée à FES (MAROC), bénéficie d'une implantation stratégique en Afrique du nord.
             </p>
             <div className="mt-8 flex flex-wrap gap-4 animate-in fade-in slide-in-from-left duration-700 delay-500">
               <a
