@@ -5,24 +5,6 @@
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
-  font-family: "Bebas Neue";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/bebasneue/v14/JTUSjIg69CK48gW7PXooxW5rygbi49c.woff2)
-    format("woff2");
-}
-
-@font-face {
-  font-family: "Barlow";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/barlow/v12/7cHpv4kjgoGqM7E_DMs5ynghnQci.woff2)
-    format("woff2");
-}
-
-@font-face {
   font-family: "Montserrat";
   font-style: normal;
   font-weight: 400;
@@ -104,8 +86,11 @@
   --color-red-brand: var(--red-brand);
   --color-red-brand-foreground: var(--red-brand-foreground);
   --color-surface: var(--surface);
+  --font-sans: "Montserrat", sans-serif;
   --font-heading: "Montserrat", sans-serif;
   --font-body: "Montserrat", sans-serif;
+  --font-serif: "Montserrat", serif;
+  --font-mono: "Montserrat", monospace;
 }
 
 :root {
