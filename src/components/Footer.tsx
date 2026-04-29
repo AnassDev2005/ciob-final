@@ -5,7 +5,7 @@ import ciobLogo from "@/assets/Logo/logo ciob.jpg";
 export default function Footer() {
   return (
     <>
-      <section className="bg-surface py-12 border-t border-border">
+      <section className="bg-surface py-12 border-t border-border print:hidden">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-center md:text-left">
@@ -62,7 +62,7 @@ export default function Footer() {
         </div>
       </section>
 
-      <footer className="bg-navy text-primary-foreground">
+      <footer className="bg-navy text-primary-foreground print:hidden">
         <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
             <div>

@@ -156,3 +156,50 @@
     font-family: var(--font-heading);
   }
 }
+
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .bg-navy {
+    background-color: white !important;
+    color: black !important;
+    padding-top: 0 !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .text-white, .text-white/60, .text-white/40, .text-primary-foreground, .text-primary-foreground/60 {
+    color: black !important;
+  }
+
+  .bg-red-brand {
+    background-color: #E20613 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .shadow-lg, .shadow-2xl, .shadow-inner, .shadow-sm {
+    shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  .border-white/10, .border-white/5 {
+    border-color: #eee !important;
+  }
+
+  .rounded-2xl, .rounded-3xl, .rounded-[2.5rem], .rounded-[3rem] {
+    border-radius: 0.5rem !important;
+  }
+
+  /* Force visibility of badges */
+  .bg-red-brand.text-white {
+    color: white !important;
+  }
+  
+  /* Hide decorative elements */
+  .bg-red-brand/20, .bg-white/10, .bg-white/5, .bg-navy/5 {
+    display: none !important;
+  }
+}

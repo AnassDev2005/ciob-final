@@ -61,7 +61,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border print:hidden">
       <div className="mx-auto max-w-7xl flex items-center justify-between px-4 py-3 lg:px-8">
         <Link to="/" className="flex items-center">
           <img src={titanicLogo} alt="Titanic" className="h-12 w-auto" />

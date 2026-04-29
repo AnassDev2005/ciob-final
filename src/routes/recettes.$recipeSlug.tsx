@@ -26,6 +26,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ImageSlider } from "@/components/ImageSlider";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/recettes/$recipeSlug")({
   component: RecipeDetailPage,
@@ -112,6 +113,35 @@ function RecipeDetailPage() {
     fetchRecipeAndRelated();
   }, [recipeSlug]);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: recipe?.title || "Recette Titanic",
+          text: recipe?.description || "Découvrez cette délicieuse recette !",
+          url: window.location.href,
+        });
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          console.error("Error sharing:", error);
+          toast.error("Erreur lors du partage");
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Lien copié dans le presse-papier !");
+      } catch (err) {
+        console.error("Failed to copy: ", err);
+        toast.error("Impossible de copier le lien");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -164,7 +194,7 @@ function RecipeDetailPage() {
       <Navbar />
 
       {/* Breadcrumbs */}
-      <div className="bg-surface border-b border-border">
+      <div className="bg-surface border-b border-border print:hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 py-4">
           <nav className="flex items-center gap-2 text-xs uppercase tracking-wider">
             <Link to="/" className="text-muted-foreground hover:text-navy transition-colors">
@@ -261,7 +291,7 @@ function RecipeDetailPage() {
 
         {/* Video Section */}
         {embedUrl && (
-          <section className="bg-surface py-12 lg:py-20">
+          <section className="bg-surface py-12 lg:py-20 print:hidden">
             <div className="mx-auto max-w-5xl px-4 sm:px-8">
               <div className="text-center mb-10">
                 <h2 className="text-3xl font-heading text-navy flex items-center justify-center gap-3">
@@ -349,11 +379,19 @@ function RecipeDetailPage() {
                     </div>
                   )}
 
-                  <div className="flex gap-4">
-                    <Button variant="outline" className="flex-1 h-14 rounded-2xl border-border gap-2 font-bold text-navy hover:bg-navy hover:text-white transition-all">
+                  <div className="flex gap-4 print:hidden">
+                    <Button 
+                      variant="outline" 
+                      onClick={handlePrint}
+                      className="flex-1 h-14 rounded-2xl border-border gap-2 font-bold text-navy hover:bg-navy hover:text-white transition-all"
+                    >
                       <Printer size={18} /> Imprimer
                     </Button>
-                    <Button variant="outline" className="flex-1 h-14 rounded-2xl border-border gap-2 font-bold text-navy hover:bg-navy hover:text-white transition-all">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleShare}
+                      className="flex-1 h-14 rounded-2xl border-border gap-2 font-bold text-navy hover:bg-navy hover:text-white transition-all"
+                    >
                       <Share2 size={18} /> Partager
                     </Button>
                   </div>
@@ -426,7 +464,7 @@ function RecipeDetailPage() {
 
       {/* Related Recipes */}
       {relatedRecipes.length > 0 && (
-        <section className="py-24 bg-surface border-t border-border relative overflow-hidden">
+        <section className="py-24 bg-surface border-t border-border relative overflow-hidden print:hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-brand/20 to-transparent" />
           
           <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-12 relative z-10">
