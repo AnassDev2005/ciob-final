@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, X, Loader2, Package, Search, Filter } from "lucid
 import { z } from "zod";
 import { ImageUpload } from "@/components/ImageUpload";
 import { MultiImageUpload } from "@/components/MultiImageUpload";
+import { ProductBadge } from "@/components/ProductBadge";
 
 export const Route = createFileRoute("/dashboard/products")({
   component: ProductsAdmin,
@@ -32,7 +33,7 @@ const schema = z.object({
   description: z.string().trim().max(1000).optional(),
   diametre: z.string().trim().max(100).optional().nullable(),
   category_id: z.string().uuid().optional().nullable(),
-  badge: z.string().trim().max(30).optional().nullable(),
+  badge: z.string().trim().max(500).optional().nullable(),
   image_url: z.string().trim().max(500).optional().or(z.literal("")),
   images: z.array(z.string()).optional().nullable(),
   features: z.string().optional(),
@@ -233,11 +234,7 @@ function ProductsAdmin() {
                     </td>
                     <td className="px-4 py-3 font-medium text-foreground">
                       {p.name}
-                      {p.badge && (
-                        <span className="ml-2 text-[10px] uppercase bg-navy text-white px-1.5 py-0.5 rounded">
-                          {p.badge}
-                        </span>
-                      )}
+                      <ProductBadge badge={p.badge} className="static inline-flex ml-2 h-4 px-1 py-0 bg-navy text-[8px]" />
                     </td>
                     <td className="px-4 py-3 text-muted-foreground font-mono text-xs">{p.ref}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{p.diametre || "—"}</td>
@@ -346,14 +343,27 @@ function ProductsAdmin() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium">Badge</label>
-                <input
-                  value={form.badge}
-                  onChange={(e) => setForm({ ...form, badge: e.target.value })}
-                  placeholder="BEST-SELLER"
-                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
+              <div className="sm:col-span-2">
+                <label className="text-sm font-medium">Badge (Texte ou Image)</label>
+                <div className="mt-1 flex gap-4 items-start">
+                  <input
+                    value={form.badge}
+                    onChange={(e) => setForm({ ...form, badge: e.target.value })}
+                    placeholder="BEST-SELLER"
+                    className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <div className="w-1/2">
+                    <ImageUpload
+                      id="product-badge-upload"
+                      value={form.badge.startsWith("http") ? form.badge : ""}
+                      onChange={(url) => setForm({ ...form, badge: url })}
+                      bucket="images"
+                    />
+                  </div>
+                </div>
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  Entrez un texte simple ou téléchargez une image pour le badge.
+                </p>
               </div>
               <div className="sm:col-span-2">
                 <label className="text-sm font-medium">Caractéristiques (une par ligne)</label>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Package, ChefHat, ZoomIn, X } from "lucide-react";
-import { Badge } from "./ui/badge";
+import { ProductBadge } from "./ProductBadge";
 import {
   Dialog,
   DialogContent,
@@ -92,11 +92,7 @@ export function ImageSlider({
               <ZoomIn size={20} />
             </div>
 
-            {badge && (
-              <Badge className="absolute top-6 left-6 bg-red-brand text-white border-none shadow-lg px-4 py-1.5 text-[10px] font-black uppercase tracking-widest">
-                {badge}
-              </Badge>
-            )}
+            <ProductBadge badge={badge} className="absolute top-6 left-6" />
 
             {safeImages.length > 1 && (
               <>

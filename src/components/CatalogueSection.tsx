@@ -10,6 +10,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { ProductBadge } from "./ProductBadge";
 
 type Product = {
   id: string;
@@ -139,11 +140,8 @@ export default function CatalogueSection() {
                   <CarouselItem key={p.id} className="pl-4 sm:basis-1/2 lg:basis-1/3">
                     <div className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-all h-full flex flex-col">
                       <div className="relative bg-surface p-6 flex items-center justify-center h-56 shrink-0">
-                        {p.badge && (
-                          <span className="absolute top-4 left-4 bg-navy text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded">
-                            {p.badge}
-                          </span>
-                        )}
+                        <ProductBadge badge={p.badge} className="absolute bg-navy top-4 left-4" />
+
                         {p.image_url ? (
                           <img
                             src={p.image_url}
@@ -159,26 +157,23 @@ export default function CatalogueSection() {
                           </div>
                         )}
                       </div>
-                      <div className="p-5 flex flex-col flex-grow">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-foreground">{p.name}</h3>
-                        </div>
-                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2 flex-grow">
-                          {p.description}
+                      <div className="p-6 flex flex-col flex-1">
+                        <h3 className="font-heading text-xl text-navy group-hover:text-red-brand transition-colors">
+                          {p.name}
+                        </h3>
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                          {p.description || "Un ustensile de cuisine de haute qualité."}
                         </p>
-                        <div className="mt-4 flex items-center justify-between pt-4 border-t border-border">
-                          <div className="flex flex-col">
-                            <span className="text-xs font-medium text-navy">Réf: {p.ref}</span>
-                            {p.diametre && (
-                              <span className="text-[10px] text-muted-foreground">{p.diametre}</span>
-                            )}
-                          </div>
+                        <div className="mt-auto pt-6 flex items-center justify-between">
+                          <span className="text-xs font-bold text-red-brand uppercase tracking-widest">
+                            Réf: {p.ref}
+                          </span>
                           <Link
                             to="/produits/$productId"
                             params={{ productId: p.id }}
-                            className="inline-flex items-center gap-1 text-sm font-medium text-red-brand hover:underline"
+                            className="text-navy hover:text-red-brand transition-colors"
                           >
-                            Voir fiche <ArrowRight size={14} />
+                            <ArrowRight size={20} />
                           </Link>
                         </div>
                       </div>
@@ -187,12 +182,22 @@ export default function CatalogueSection() {
                 ))}
               </CarouselContent>
               <div className="hidden lg:block">
-                <CarouselPrevious className="-left-10" />
-                <CarouselNext className="-right-10" />
+                <CarouselPrevious className="-left-12 bg-white border-navy/10 text-navy hover:bg-navy hover:text-white" />
+                <CarouselNext className="-right-12 bg-white border-navy/10 text-navy hover:bg-navy hover:text-white" />
               </div>
             </Carousel>
           </div>
         )}
+
+        <div className="mt-16 text-center">
+          <Link
+            to="/produits"
+            className="inline-flex items-center gap-2 border-b-2 border-red-brand pb-1 text-sm font-bold text-navy hover:text-red-brand transition-all group"
+          >
+            VOIR TOUS LES PRODUITS
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
       </div>
     </section>
   );

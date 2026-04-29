@@ -21,6 +21,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ProductBadge } from "@/components/ProductBadge";
 import { ImageSlider } from "@/components/ImageSlider";
 
 export const Route = createFileRoute("/produits/$productId")({
@@ -193,11 +194,7 @@ function ProductDetailPage() {
                 <Badge variant="outline" className="border-navy/20 text-navy font-semibold uppercase tracking-widest text-[10px] px-3 py-1 bg-navy/5">
                   {product.category?.name || "Ustensile"}
                 </Badge>
-                {product.badge && (
-                  <Badge className="bg-red-brand text-white border-none text-[10px] uppercase tracking-wider font-bold">
-                    {product.badge}
-                  </Badge>
-                )}
+                <ProductBadge badge={product.badge} className="static shadow-none" />
               </div>
               
               <h1 className="text-4xl lg:text-6xl font-heading text-navy leading-tight tracking-tight">

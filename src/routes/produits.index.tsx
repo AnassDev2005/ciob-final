@@ -11,6 +11,7 @@ import {
   Package,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ProductBadge } from "@/components/ProductBadge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import heroProduct from "@/assets/hero-product.jpg";
@@ -294,13 +295,7 @@ function ProduitsPage() {
                     className="group bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all"
                   >
                     <div className="relative bg-surface p-6 flex items-center justify-center h-60 overflow-hidden">
-                      {p.badge && (
-                        <span
-                          className={`absolute top-4 left-4 bg-navy text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded`}
-                        >
-                          {p.badge}
-                        </span>
-                      )}
+                      <ProductBadge badge={p.badge} className="absolute bg-navy top-4 left-4" />
                       {p.image_url ? (
                         <img
                           src={p.image_url}
