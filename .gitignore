@@ -38,3 +38,4 @@ dist-ssr
 
 # Supabase Data Backups
 backup_*.json
+.vercel

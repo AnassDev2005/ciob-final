@@ -42,7 +42,7 @@ export const Route = createRootRoute({
       {
         property: "og:description",
         content:
-          "Leader marocain de la cuisson industrielle. Aluminium, inox, antiadhésif et gamme pro.",
+          "Une question, un projet, un devis ? L'équipe TITANIC à Casablanca est à votre écoute.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -55,24 +55,9 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
-
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   return (

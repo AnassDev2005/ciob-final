@@ -71,8 +71,8 @@ function ContactPage() {
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [message, setMessage] = useState(
-    ref 
-      ? `Bonjour, je souhaiterais obtenir un devis pour le ${type === "recipe" ? "plat" : "produit"} suivant : ${ref}.` 
+    ref
+      ? `Bonjour, je souhaiterais obtenir un devis pour le ${type === "recipe" ? "plat" : "produit"} suivant : ${ref}.`
       : ""
   );
   const [submitting, setSubmitting] = useState(false);
@@ -81,7 +81,7 @@ function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    
+
     const { error } = await supabase.from("contacts").insert({
       full_name: fullName,
       email,
@@ -92,7 +92,7 @@ function ContactPage() {
     });
 
     setSubmitting(false);
-    
+
     if (error) {
       toast.error("Erreur lors de l'envoi : " + error.message);
       return;
@@ -100,14 +100,14 @@ function ContactPage() {
 
     setSubmitted(true);
     toast.success("Message envoyé avec succès !");
-    
+
     // Reset form
     setFullName("");
     setEmail("");
     setPhone("");
     setCompany("");
     setMessage("");
-    
+
     setTimeout(() => setSubmitted(false), 5000);
   };
 
@@ -258,11 +258,10 @@ function ContactPage() {
                       key={s}
                       type="button"
                       onClick={() => setSubject(s)}
-                      className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
-                        subject === s
+                      className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${subject === s
                           ? "bg-navy text-primary-foreground"
                           : "bg-card border border-border text-foreground hover:bg-navy/5"
-                      }`}
+                        }`}
                     >
                       {s}
                     </button>
@@ -335,10 +334,12 @@ function ContactPage() {
 
             <div className="rounded-2xl overflow-hidden border border-border h-72">
               <iframe
-                title="Localisation TITANIC Casablanca"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=-7.65%2C33.55%2C-7.55%2C33.62&layer=mapnik"
+                title="Ciob Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3308.153183864693!2d-5.0740911763586105!3d33.98859892108703!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda02182eedc115f%3A0xc1776effec2047da!2sCiob!5e0!3m2!1sar!2sma!4v1777542904806!5m2!1sar!2sma"
                 className="w-full h-full"
                 loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
               />
             </div>
 
